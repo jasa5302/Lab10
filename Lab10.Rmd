@@ -6,25 +6,51 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+library(tidyverse)
+library(lubridate)
 ```
 
-## R Markdown
+##Features that Affect Score of Question and/or Answer
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+###Which features?
+We have found that timeliness of an answer definitely affects the score of that answer with a strong trend towards shorter response times generating much higher scores on average.  Even though there were a few answers with much longer response times that received extremely high scores, these observations represented unique outliers
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r cars}
-summary(cars)
+###Adam's Findings
+
+```{r}
+
+dataAnswerAdam <- read_csv("Answers_trunc.csv") %>%
+  subset(select = -c(X7))
+
+dataQuestionAdam <- read_csv("Questions_trunc.csv") %>%
+  subset(select = -c(X7))
+
+joinedDataAdam <- dataQuestionAdam %>%
+  left_join(dataAnswerAdam, c("Id" = "ParentId"), suffix = c(".Q",".A"))%>%
+  #mutate(Time_Elapsed = difftime(CreationDate.A,CreationDate.Q))
+  mutate(Time_Elapsed = (CreationDate.Q %--% CreationDate.A)/dhours(1))%>%
+  filter(Time_Elapsed >= 0)
+
+ggplot(data = joinedDataAdam)+
+  geom_point(mapping = aes(x = Time_Elapsed, y = Score.A),size = 1,position = "jitter")+
+  ylim(0,2000)+
+  labs(title = "Timeliness of Question being Answered vs. Score of the Answer")+
+  xlab("Time in Hours")
+
+
+ggplot(data = joinedDataAdam)+
+  geom_point(mapping = aes(x = Time_Elapsed, y = Score.Q),size = 1,position = "jitter")+
+  ylim(0,2000)+
+  labs(title = "Timeliness of Question being Answered vs. Score of the Question")+
+  xlab("Time in Hours")
 ```
 
-## Including Plots
+####Comments
+The graph representing timeliness of answer and score of that answer shows a very strong trend towards shorter response times receiving higher scores.  Other than 3 outlier scores, there are no scores over 500 with response times that are very far from 0 hours on the graph.  On the other hand, there are many scores well over 500 with response times that are less than an hour.  For the score of the question graph, this same trend seems to hold, but with greater variation in the scores.  I believe this trend is so strong in the graph comparing scores of the answer because people nowadays want answers faster, therefore the quicker someone can receive an answer the higher they will tend to score that answer.  The outliers could also come from much more complex answers that were extremely well thought out, but took much more time to post, therefore they receive these extremely high scores based on quality, and not response time.
 
-You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+###Who did what:
+Adam generated a new feature for the time difference between when the question was posted, and when the question was answered represented in hours.  He used mutate with a time interval function from the lubridate package to create this new feature.  He also filtered the data for only positive response times as there were a few errors in the data where there wasn't a recorded time for the question answer.  He then created two different geom_point graphs, one representing timeliness of answer vs. score of answer, and the other representing timeliness vs. score of question.
