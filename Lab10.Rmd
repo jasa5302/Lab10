@@ -75,10 +75,37 @@ ggplot(data = questions_erin) + geom_point(mapping = aes(x = QwithHow, y = Score
 
 ggplot(data = questions_erin) + geom_point(mapping = aes(x = withoutHowQ, y = Score),position = "jitter", color = "green") + ylim(0,1000) + xlab("Number of Questions NOT containg 'How'") + ggtitle("Comparison of Score vs. Question NOT containg 'How'")
 ```
+
 ####Comments
 Due to the vast amount of data contained in this Question and Answer package, it was difficult to minimize the graphs without causing too much of elimination to specific points. But, the graphs compare the score between using a question with the word 'How' versus without it. In the graphs, it is more common to ask a question containing a beginning word other than 'How', as show on the values being larger on the x-axis for questions not containing 'How'. Overall, the scores are roughly lower in questions that use the word 'How', in comparison to not.
 
+### Richard's Findings 
 
+```{r}
+DataAnswerRich <- read_csv("Answers_trunc.csv")
+is.na.data.frame(DataAnswerRich)
+DataQuestionRich <- read_csv("Questions_trunc.csv")
+
+QuestionswithPersonalPronoun <- DataQuestionRich %>%
+  select("Body") %>%
+  str_detect(pattern = "I") %>%
+  sum()
+
+QuestionswithoutPersonalPronoun <- DataQuestionRich %>%
+  select("Body") %>%
+  str_detect(pattern = "[^(I)]") %>%
+  sum()
+
+ggplot(data = DataQuestionRich) + geom_point(mapping = aes(x = QuestionswithPersonalPronoun, y = Score), position = "jitter", color = "blue", size = 0.5) + stat_smooth(mapping = aes(x = QuestionswithPersonalPronoun, y = Score)) +
+xlab("Number of upvotes based on questions containing personal pronouns") + ggtitle("Are personally relevant questions asked with personal pronouns such as 'I' upvoted more?")
+
+ggplot(data = DataQuestionRich) + geom_point(mapping = aes(x = QuestionswithoutPersonalPronoun, y = Score), position = "jitter", color = "red", size = 0.5) + stat_smooth(mapping = aes(x = QuestionswithoutPersonalPronoun, y = Score)) +
+xlab("Number of upvotes based on questions WITHOUT containing personal pronouns") + ggtitle("Are non-personal questions asked without personal pronouns such as 'I' upvoted more?")
+
+```
+
+#### Comments
+After looking at both visual representations of this Q & A package, the graphs revealed that there was no significant or noticable difference in scores between questions that were asked with personal pronouns (such as "I") and questions that were not asked with personal pronouns. I wanted to investigate and see if people upvoted questions that they thought was more personally relevant to them (in terms of learning python). Using the geom_smooth function, I tried to see if there was any significant difference in the trendlines comparing scores but both trendlines seemed to be near the bottom. 
 
 ###Who did what:
-Adam generated a new feature for the time difference between when the question was posted, and when the question was answered represented in hours.  He used mutate with a time interval function from the lubridate package to create this new feature.  He also filtered the data for only positive response times as there were a few errors in the data where there wasn't a recorded time for the question answer.  He then created two different geom_point graphs, one representing timeliness of answer vs. score of answer, and the other representing timeliness vs. score of question. Erin created features to uncover if the impact of using a specific word would allow a higher score. Through this, she used the function str_detect to locate the word 'How' in the strings of questions, then counted the number of them detected. In comparison, the relationship between using the word 'How' in a question and the score received versus not using 'How' is minimal. It was more common to use the question without 'How', as displayed on the larger x-axis of the second ggplot. 
+Adam generated a new feature for the time difference between when the question was posted, and when the question was answered represented in hours.  He used mutate with a time interval function from the lubridate package to create this new feature.  He also filtered the data for only positive response times as there were a few errors in the data where there wasn't a recorded time for the question answer.  He then created two different geom_point graphs, one representing timeliness of answer vs. score of answer, and the other representing timeliness vs. score of question. Erin created features to uncover if the impact of using a specific word would allow a higher score. Through this, she used the function str_detect to locate the word 'How' in the strings of questions, then counted the number of them detected. In comparison, the relationship between using the word 'How' in a question and the score received versus not using 'How' is minimal. It was more common to use the question without 'How', as displayed on the larger x-axis of the second ggplot. Richard investigated the body of questions asked to see if personally relevant questions received higher scores (or upvotes). It was determined that by using personal pronouns such as "I" in the body of questions would make the question "personally relevant." Therefore, the str_detect function was utilized to locate all questions with the personal pronoun "I" in a question and locate all questions that did not include any personal pronouns. Richard also used the geom_smooth function in his graphs to help him see if there was any significant difference in trendlines but there seemed to be no difference. In conclusion to Richard's findings, answering a personally relevant question on the forum did not seem to make any difference in your score versus answering a question that was not personally relevant. 
