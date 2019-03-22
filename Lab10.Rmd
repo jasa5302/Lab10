@@ -79,11 +79,10 @@ ggplot(data = questions_erin) + geom_point(mapping = aes(x = withoutHowQ, y = Sc
 ####Comments
 Due to the vast amount of data contained in this Question and Answer package, it was difficult to minimize the graphs without causing too much of elimination to specific points. But, the graphs compare the score between using a question with the word 'How' versus without it. In the graphs, it is more common to ask a question containing a beginning word other than 'How', as show on the values being larger on the x-axis for questions not containing 'How'. Overall, the scores are roughly lower in questions that use the word 'How', in comparison to not.
 
-### Richard's Findings 
+###Richard's Findings 
 
 ```{r}
 DataAnswerRich <- read_csv("Answers_trunc.csv")
-is.na.data.frame(DataAnswerRich)
 DataQuestionRich <- read_csv("Questions_trunc.csv")
 
 QuestionswithPersonalPronoun <- DataQuestionRich %>%
@@ -104,8 +103,40 @@ xlab("Number of upvotes based on questions WITHOUT containing personal pronouns"
 
 ```
 
-#### Comments
+####Comments
 After looking at both visual representations of this Q & A package, the graphs revealed that there was no significant or noticable difference in scores between questions that were asked with personal pronouns (such as "I") and questions that were not asked with personal pronouns. I wanted to investigate and see if people upvoted questions that they thought was more personally relevant to them (in terms of learning python). Using the geom_smooth function, I tried to see if there was any significant difference in the trendlines comparing scores but both trendlines seemed to be near the bottom. 
 
+###Jasmine's Findings
+```{r}
+J_answers <- read.csv("file:///C:/Users/sanch/OneDrive/Documents/R/Lab10/Answers_trunc.csv")
+J_answer <- subset(J_answers, select = -c(X))
+J_answer2 <- J_answer %>%
+  group_by(ParentId) %>%
+  tally()
+J_answer3 <- J_answer2 %>%
+  filter(n > 5)
+J_answer4 <- J_answer %>%
+  filter(Score < 1000)
+
+joint_Jdata <- J_answer %>%
+  left_join(J_answer3)
+joint_Jdata2 <- joint_Jdata %>%
+  left_join(J_answer4)
+
+ggplot(data = joint_Jdata2)+
+  geom_smooth(mapping = aes(x = Score, y = n), span = 0.5, na.rm = TRUE)+
+  xlim(0,1000)+
+  ggtitle("Individuals answering more than 5 questions with a Score less than 1000 ")
+
+ggplot(joint_Jdata2, aes(n))+
+  geom_bar(na.rm = TRUE, fill = 'blue')+
+  ggtitle("Individuals answering more than 5 questions with any score")
+```
+
+####Comments
+I wanted to take a look more closesly at the answers that certain users were providing. When looking more closesly, I noticed that there were a number of individuals who responded to more than 1 question. With this, I then decided to create a new column in our data set that displays the number of times that an individual has answered a question more than 5 times and found that there was a stronger correlation between the score of the question and the number of times an indivudal has previously answered a question. This suggested to me that the more times an individual answers a question, the lower the score of the question. When you are more dedicated to providing accurate responses, the more likely you are to be more critical of the question and how the response is delivered. The first graph represents this becuase it shows the scores of questions that have been ansewered by individuals answering more than 5 questions and a scorre less than 1000. The second graph then provides the same information but shows ALL scores. Those with the highest scores were scores by individuals with less experiecne responding to question less often. 
+
+
+
 ###Who did what:
-Adam generated a new feature for the time difference between when the question was posted, and when the question was answered represented in hours.  He used mutate with a time interval function from the lubridate package to create this new feature.  He also filtered the data for only positive response times as there were a few errors in the data where there wasn't a recorded time for the question answer.  He then created two different geom_point graphs, one representing timeliness of answer vs. score of answer, and the other representing timeliness vs. score of question. Erin created features to uncover if the impact of using a specific word would allow a higher score. Through this, she used the function str_detect to locate the word 'How' in the strings of questions, then counted the number of them detected. In comparison, the relationship between using the word 'How' in a question and the score received versus not using 'How' is minimal. It was more common to use the question without 'How', as displayed on the larger x-axis of the second ggplot. Richard investigated the body of questions asked to see if personally relevant questions received higher scores (or upvotes). It was determined that by using personal pronouns such as "I" in the body of questions would make the question "personally relevant." Therefore, the str_detect function was utilized to locate all questions with the personal pronoun "I" in a question and locate all questions that did not include any personal pronouns. Richard also used the geom_smooth function in his graphs to help him see if there was any significant difference in trendlines but there seemed to be no difference. In conclusion to Richard's findings, answering a personally relevant question on the forum did not seem to make any difference in your score versus answering a question that was not personally relevant. 
+Adam generated a new feature for the time difference between when the question was posted, and when the question was answered represented in hours.  He used mutate with a time interval function from the lubridate package to create this new feature.  He also filtered the data for only positive response times as there were a few errors in the data where there wasn't a recorded time for the question answer.  He then created two different geom_point graphs, one representing timeliness of answer vs. score of answer, and the other representing timeliness vs. score of question. Erin created features to uncover if the impact of using a specific word would allow a higher score. Through this, she used the function str_detect to locate the word 'How' in the strings of questions, then counted the number of them detected. In comparison, the relationship between using the word 'How' in a question and the score received versus not using 'How' is minimal. It was more common to use the question without 'How', as displayed on the larger x-axis of the second ggplot. Richard investigated the body of questions asked to see if personally relevant questions received higher scores (or upvotes). It was determined that by using personal pronouns such as "I" in the body of questions would make the question "personally relevant." Therefore, the str_detect function was utilized to locate all questions with the personal pronoun "I" in a question and locate all questions that did not include any personal pronouns. Richard also used the geom_smooth function in his graphs to help him see if there was any significant difference in trendlines but there seemed to be no difference. In conclusion to Richard's findings, answering a personally relevant question on the forum did not seem to make any difference in your score versus answering a question that was not personally relevant. Jasmine tallied the number of times an individual has answered a question in the dataset. She then filtered those values to be greater than a number of 5 answers to different questions. She also evaluated the scores between each of the questions and the individuals that have more experience answering various question and how they score them differently. 
