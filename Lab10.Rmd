@@ -9,6 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 library(tidyverse)
 library(lubridate)
+library(stringr)
 ```
 
 ##Features that Affect Score of Question and/or Answer
@@ -50,7 +51,34 @@ ggplot(data = joinedDataAdam)+
 ####Comments
 The graph representing timeliness of answer and score of that answer shows a very strong trend towards shorter response times receiving higher scores.  Other than 3 outlier scores, there are no scores over 500 with response times that are very far from 0 hours on the graph.  On the other hand, there are many scores well over 500 with response times that are less than an hour.  For the score of the question graph, this same trend seems to hold, but with greater variation in the scores.  I believe this trend is so strong in the graph comparing scores of the answer because people nowadays want answers faster, therefore the quicker someone can receive an answer the higher they will tend to score that answer.  The outliers could also come from much more complex answers that were extremely well thought out, but took much more time to post, therefore they receive these extremely high scores based on quality, and not response time.
 
+###Erin's Findings
+
+```{r}
+answers_erin <- read_csv("Answers_trunc.csv")
+questions_erin <- read_csv("Questions_trunc.csv") 
+questions_erin
+
+QwithHow <- questions_erin %>%
+  select("Title") %>%
+  str_detect(pattern = "How") %>%
+  sum()
+QwithHow
+
+withoutHowQ <- questions_erin %>%
+  str_detect(pattern = "[^(How)]") %>%
+  sum()
+withoutHowQ
+
+
+
+ggplot(data = questions_erin) + geom_point(mapping = aes(x = QwithHow, y = Score), position = "jitter", color = "pink") + ylim(0,1000) + xlab("Number of Questions containg 'How'") + ggtitle("Comparison of Score vs. Question containg 'How'")
+
+ggplot(data = questions_erin) + geom_point(mapping = aes(x = withoutHowQ, y = Score),position = "jitter", color = "green") + ylim(0,1000) + xlab("Number of Questions NOT containg 'How'") + ggtitle("Comparison of Score vs. Question NOT containg 'How'")
+```
+####Comments
+Due to the vast amount of data contained in this Question and Answer package, it was difficult to minimize the graphs without causing too much of elimination to specific points. But, the graphs compare the score between using a question with the word 'How' versus without it. In the graphs, it is more common to ask a question containing a beginning word other than 'How', as show on the values being larger on the x-axis for questions not containing 'How'. Overall, the scores are roughly lower in questions that use the word 'How', in comparison to not.
+
 
 
 ###Who did what:
-Adam generated a new feature for the time difference between when the question was posted, and when the question was answered represented in hours.  He used mutate with a time interval function from the lubridate package to create this new feature.  He also filtered the data for only positive response times as there were a few errors in the data where there wasn't a recorded time for the question answer.  He then created two different geom_point graphs, one representing timeliness of answer vs. score of answer, and the other representing timeliness vs. score of question.
+Adam generated a new feature for the time difference between when the question was posted, and when the question was answered represented in hours.  He used mutate with a time interval function from the lubridate package to create this new feature.  He also filtered the data for only positive response times as there were a few errors in the data where there wasn't a recorded time for the question answer.  He then created two different geom_point graphs, one representing timeliness of answer vs. score of answer, and the other representing timeliness vs. score of question. Erin created features to uncover if the impact of using a specific word would allow a higher score. Through this, she used the function str_detect to locate the word 'How' in the strings of questions, then counted the number of them detected. In comparison, the relationship between using the word 'How' in a question and the score received versus not using 'How' is minimal. It was more common to use the question without 'How', as displayed on the larger x-axis of the second ggplot. 
